@@ -2,7 +2,7 @@ checkStream();
 
 setInterval(function () {
     checkStream();
-}, 10000);
+}, 3000);
 
 function checkStream() {
     $.ajax({
@@ -26,25 +26,31 @@ function checkStream() {
                        });
 
                        chrome.notifications.clear('Live');
-                   })
-               } else {
-                   chrome.storage.onChanged.addListener(function (changes, namespace) {
-                       for (var key in changes) {
-                           if (key === 'title') {
-                               chrome.storage.sync.set({'title': response.data[0].title}, function (data) {
-                                   chrome.browserAction.setIcon({ path: "img/ftv-green.png" });
-                                   chrome.notifications.create('Live', {
-                                       type: 'basic',
-                                       iconUrl: 'img/ftv-green.png',
-                                       title: 'La FroggedTV est en live',
-                                       message: response.data[0].title
-                                   });
-
-                                   chrome.notifications.clear('Live');
-                               });
-                           }
-                       }
                    });
+               } else {
+                  chrome.storage.sync.get('title', function(result) {
+                      if (result.title != response.data[0].title) {
+                        chrome.storage.sync.set({'title': response.data[0].title}, function (data) {
+                          chrome.storage.onChanged.addListener(function (changes, namespace) {
+                            console.log(changes);
+                            console.log(namespace);
+                            for (var key in changes) {
+                              if (key === 'title') {
+                                chrome.browserAction.setIcon({ path: "img/ftv-green.png" });
+                                chrome.notifications.create('Live', {
+                                  type: 'basic',
+                                  iconUrl: 'img/ftv-green.png',
+                                  title: 'La FroggedTV est en live',
+                                  message: changes[key].newValue
+                                });
+                              }
+                            }
+                          });
+
+                          chrome.notifications.clear('Live');
+                        });
+                      }
+                  });
                }
             });
         } else {
