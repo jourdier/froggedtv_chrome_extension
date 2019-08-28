@@ -32,8 +32,6 @@ function checkStream() {
                       if (result.title != response.data[0].title) {
                         chrome.storage.sync.set({'title': response.data[0].title}, function (data) {
                           chrome.storage.onChanged.addListener(function (changes, namespace) {
-                            console.log(changes);
-                            console.log(namespace);
                             for (var key in changes) {
                               if (key === 'title') {
                                 chrome.browserAction.setIcon({ path: "img/ftv-green.png" });
@@ -65,3 +63,9 @@ function checkStream() {
         }
     });
 }
+
+chrome.commands.onCommand.addListener(function(command) {
+    if (command === 'open-froggedtv-site') {
+        window.open('https://www.frogged.tv/', '_blank');
+    }
+});
